@@ -1,0 +1,21 @@
+spring:
+  main:
+    allow-bean-definition-overriding: true
+
+  r2dbc:
+    url: r2dbc:h2:mem:///payrolldb;DB_CLOSE_DELAY=-1;MODE=PostgreSQL
+
+  sql:
+    init:
+      mode: always
+      platform: h2
+
+server:
+  port: 8080
+
+logging:
+  level:
+    root: INFO
+    br.com.example.payroll: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%X{correlationId}] %logger{36} - %msg%n"

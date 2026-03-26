@@ -2,11 +2,13 @@ package br.com.example.payroll.domain;
 
 import lombok.*;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
+import org.springframework.data.domain.Persistable;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
@@ -14,7 +16,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 @Table("payroll_event")
-public class PayrollEvent {
+public class PayrollEvent implements Persistable<UUID> {
     @Id
     private UUID id;
     private UUID companyId;
@@ -25,6 +27,19 @@ public class PayrollEvent {
     private BigDecimal quantity;
     private BigDecimal amount;
     private String metadata; // JSON as String
-    private OffsetDateTime createdAt;
-    private OffsetDateTime updatedAt;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+
+    @Transient
+    private boolean newEntity;
+
+    @Override
+    public UUID getId() {
+        return id;
+    }
+
+    @Override
+    public boolean isNew() {
+        return newEntity;
+    }
 }

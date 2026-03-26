@@ -1,0 +1,3 @@
+br\com\example\payroll\integration\EventControllerIntegrationTest.class
+br\com\example\payroll\service\EventServiceImplTest.class
+br\com\example\payroll\mapper\EventMapperTest.class

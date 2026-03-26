@@ -1,0 +1,177 @@
+openapi: 3.0.3
+info:
+  title: sboot-payroll-events-service
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+paths:
+  /api/v1/events:
+    post:
+      summary: Create payroll event
+      description: Create an event for an employee. Company is provided via header X-Company-Id.
+      parameters:
+        - name: X-Company-Id
+          in: header
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PayrollEventRequest'
+            example:
+              employeeId: "bbbbbbbb-0000-0000-0000-000000000001"
+              eventTypeCode: "HORA_EXTRA"
+              eventDate: "2026-03-10"
+              quantity: 5
+              amount: 250.00
+              description: "Hora extra noturna 50%"
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PayrollEventResponse'
+    get:
+      summary: List events by employee and period
+      parameters:
+        - name: X-Company-Id
+          in: header
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: employeeId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: startDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: List of events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PayrollEventResponse'
+  /api/v1/events/consolidated:
+    get:
+      summary: Consolidate events for a period
+      parameters:
+        - name: X-Company-Id
+          in: header
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: employeeId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: period
+          in: query
+          required: true
+          schema:
+            type: string
+            example: "2026-03"
+      responses:
+        '200':
+          description: Consolidated amounts
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConsolidatedResponse'
+components:
+  schemas:
+    PayrollEventRequest:
+      type: object
+      properties:
+        employeeId:
+          type: string
+          format: uuid
+        eventTypeCode:
+          type: string
+        description:
+          type: string
+        eventDate:
+          type: string
+          format: date
+        quantity:
+          type: number
+          format: decimal
+        amount:
+          type: number
+          format: decimal
+        metadata:
+          type: string
+      required:
+        - employeeId
+        - eventTypeCode
+        - eventDate
+    PayrollEventResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        companyId:
+          type: string
+          format: uuid
+        employeeId:
+          type: string
+          format: uuid
+        eventTypeCode:
+          type: string
+        description:
+          type: string
+        eventDate:
+          type: string
+          format: date
+        quantity:
+          type: number
+          format: decimal
+        amount:
+          type: number
+          format: decimal
+        metadata:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    ConsolidatedResponse:
+      type: object
+      properties:
+        totalHorasExtras:
+          type: number
+          format: decimal
+        totalFaltas:
+          type: number
+          format: decimal
+        totalDescontos:
+          type: number
+          format: decimal
+        totalBeneficios:
+          type: number

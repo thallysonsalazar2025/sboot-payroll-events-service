@@ -45,9 +45,9 @@ public class EventController {
 
     @GetMapping
     public Flux<PayrollEventResponse> list(@RequestHeader("X-Company-Id") String companyHeader,
-                                           @RequestParam UUID employeeId,
-                                           @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) String startDate,
-                                           @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) String endDate) {
+                                           @RequestParam("employeeId") UUID employeeId,
+                                           @RequestParam(name = "startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) String startDate,
+                                           @RequestParam(name = "endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) String endDate) {
         UUID companyId = getCompanyIdFromHeader(companyHeader);
         log.debug("List events for company={}, employee={}, start={}, end={}", companyId, employeeId, startDate, endDate);
         return service.listEvents(companyId, employeeId, startDate, endDate);
@@ -55,8 +55,8 @@ public class EventController {
 
     @GetMapping("/consolidated")
     public Mono<ConsolidatedResponse> consolidated(@RequestHeader("X-Company-Id") String companyHeader,
-                                                   @RequestParam UUID employeeId,
-                                                   @RequestParam String period) {
+                                                   @RequestParam("employeeId") UUID employeeId,
+                                                   @RequestParam("period") String period) {
         UUID companyId = getCompanyIdFromHeader(companyHeader);
         YearMonth ym = YearMonth.parse(period);
         log.debug("Consolidate events for company={}, employee={}, period={}", companyId, employeeId, period);

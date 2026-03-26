@@ -4,13 +4,13 @@ import br.com.example.payroll.domain.PayrollEvent;
 import br.com.example.payroll.dto.PayrollEventRequest;
 import br.com.example.payroll.dto.PayrollEventResponse;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 public class EventMapper {
 
     public static PayrollEvent toEntity(PayrollEventRequest req, UUID companyId) {
-        return PayrollEvent.builder()
+        PayrollEvent entity = PayrollEvent.builder()
                 .id(UUID.randomUUID())
                 .companyId(companyId)
                 .employeeId(req.getEmployeeId())
@@ -20,9 +20,11 @@ public class EventMapper {
                 .quantity(req.getQuantity())
                 .amount(req.getAmount())
                 .metadata(req.getMetadata())
-                .createdAt(OffsetDateTime.now())
-                .updatedAt(OffsetDateTime.now())
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
                 .build();
+        entity.setNewEntity(true);
+        return entity;
     }
 
     public static PayrollEventResponse toDto(PayrollEvent e) {

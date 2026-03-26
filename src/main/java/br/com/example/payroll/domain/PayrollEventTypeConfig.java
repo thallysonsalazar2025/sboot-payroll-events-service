@@ -4,7 +4,7 @@ import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
@@ -22,5 +22,5 @@ public class PayrollEventTypeConfig {
     private Boolean isDiscount;
     private String calculationHint; // FIXED / MULTIPLIER / PERCENTAGE
     private Boolean active;
-    private OffsetDateTime createdAt;
+    private LocalDateTime createdAt;
 }

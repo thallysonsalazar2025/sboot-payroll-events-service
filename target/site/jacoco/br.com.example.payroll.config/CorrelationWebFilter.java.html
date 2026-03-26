@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CorrelationWebFilter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">sboot-payroll-events-service</a> &gt; <a href="index.source.html" class="el_package">br.com.example.payroll.config</a> &gt; <span class="el_source">CorrelationWebFilter.java</span></div><h1>CorrelationWebFilter.java</h1><pre class="source lang-java linenums">package br.com.example.payroll.config;
+
+import org.slf4j.MDC;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.stereotype.Component;
+import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebFilter;
+import org.springframework.web.server.WebFilterChain;
+import reactor.core.publisher.Mono;
+
+import java.util.UUID;
+
+/**
+ * WebFilter que garante X-Correlation-Id e popula MDC para logs.
+ * Mantém comportamento reativo.
+ */
+@Component
+<span class="fc" id="L18">public class CorrelationWebFilter implements WebFilter {</span>
+
+    private static final String CORRELATION_HEADER = &quot;X-Correlation-Id&quot;;
+    private static final String MDC_KEY = &quot;correlationId&quot;;
+
+    @Override
+    public Mono&lt;Void&gt; filter(ServerWebExchange exchange, WebFilterChain chain) {
+<span class="fc" id="L25">        ServerHttpRequest request = exchange.getRequest();</span>
+<span class="fc" id="L26">        String incoming = request.getHeaders().getFirst(CORRELATION_HEADER);</span>
+<span class="pc bpc" id="L27" title="3 of 4 branches missed.">        String correlationId = (incoming == null || incoming.isBlank()) ? UUID.randomUUID().toString() : incoming;</span>
+
+        // Put correlationId into MDC for this reactive flow
+<span class="fc" id="L30">        return chain.filter(exchange)</span>
+<span class="fc" id="L31">                .contextWrite(ctx -&gt; ctx.put(MDC_KEY, correlationId))</span>
+<span class="fc" id="L32">                .doOnEach(signal -&gt; {</span>
+                    // For each signal, if context has correlationId, push into MDC so Logback sees it
+<span class="pc bpc" id="L34" title="1 of 2 branches missed.">                    if (signal.getContextView().hasKey(MDC_KEY)) {</span>
+<span class="nc" id="L35">                        MDC.put(MDC_KEY, signal.getContextView().get(MDC_KEY));</span>
+                    }
+<span class="fc" id="L37">                })</span>
+<span class="fc" id="L38">                .doFinally(sig -&gt; MDC.remove(MDC_KEY));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

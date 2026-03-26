@@ -6,18 +6,16 @@ import br.com.example.payroll.dto.PayrollEventRequest;
 import br.com.example.payroll.dto.PayrollEventResponse;
 import br.com.example.payroll.mapper.EventMapper;
 import br.com.example.payroll.repository.PayrollEventRepository;
-import br.com.example.payroll.repository.PayrollEventTypeConfigRepository;
 import br.com.example.payroll.service.EventService;
+import br.com.example.payroll.service.support.EventDateRange;
+import br.com.example.payroll.service.support.PayrollEventConsolidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.YearMonth;
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -26,12 +24,12 @@ public class EventServiceImpl implements EventService {
     private static final Logger log = LoggerFactory.getLogger(EventServiceImpl.class);
 
     private final PayrollEventRepository eventRepository;
-    private final PayrollEventTypeConfigRepository typeRepository;
+    private final PayrollEventConsolidator consolidator;
 
     public EventServiceImpl(PayrollEventRepository eventRepository,
-                            PayrollEventTypeConfigRepository typeRepository) {
+                            PayrollEventConsolidator consolidator) {
         this.eventRepository = eventRepository;
-        this.typeRepository = typeRepository;
+        this.consolidator = consolidator;
     }
 
     @Override
@@ -44,50 +42,21 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public reactor.core.publisher.Flux<PayrollEventResponse> listEvents(UUID companyId, UUID employeeId, String startDate, String endDate) {
-        LocalDate start = LocalDate.parse(startDate);
-        LocalDate end = LocalDate.parse(endDate);
-        return eventRepository.findByEmployeeAndPeriod(employeeId, start, end)
-                .filter(e -> e.getCompanyId() != null && e.getCompanyId().equals(companyId))
+        EventDateRange range = EventDateRange.fromStrings(startDate, endDate);
+        return eventsForCompany(companyId, employeeId, range)
                 .map(EventMapper::toDto);
     }
 
     @Override
     public Mono<ConsolidatedResponse> consolidate(UUID companyId, UUID employeeId, YearMonth period) {
-        LocalDate start = period.atDay(1);
-        LocalDate end = period.atEndOfMonth();
-        return eventRepository.findByEmployeeAndPeriod(employeeId, start, end)
-                .filter(e -> e.getCompanyId() != null && e.getCompanyId().equals(companyId))
+        EventDateRange range = EventDateRange.fromYearMonth(period);
+        return eventsForCompany(companyId, employeeId, range)
                 .collectList()
-                .flatMap(list -> Mono.just(doConsolidation(list)));
+                .map(consolidator::consolidate);
     }
 
-    private ConsolidatedResponse doConsolidation(List<PayrollEvent> list) {
-        BigDecimal totalHorasExtras = BigDecimal.ZERO;
-        BigDecimal totalFaltas = BigDecimal.ZERO;
-        BigDecimal totalDescontos = BigDecimal.ZERO;
-        BigDecimal totalBeneficios = BigDecimal.ZERO;
-
-        for (PayrollEvent e : list) {
-            String code = e.getEventTypeCode();
-            BigDecimal amount = e.getAmount() == null ? BigDecimal.ZERO : e.getAmount();
-            BigDecimal qty = e.getQuantity() == null ? BigDecimal.ZERO : e.getQuantity();
-
-            switch (code) {
-                case "HORA_EXTRA" -> totalHorasExtras = totalHorasExtras.add(amount);
-                case "FALTA" -> totalFaltas = totalFaltas.add(qty);
-                case "ADIANTAMENTO", "PENSION" -> totalDescontos = totalDescontos.add(amount);
-                case "BENEF_VR", "BENEF_VA", "BONUS" -> totalBeneficios = totalBeneficios.add(amount);
-                default -> {
-                    // not categorized
-                }
-            }
-        }
-
-        ConsolidatedResponse resp = new ConsolidatedResponse();
-        resp.setTotalHorasExtras(totalHorasExtras);
-        resp.setTotalFaltas(totalFaltas);
-        resp.setTotalDescontos(totalDescontos);
-        resp.setTotalBeneficios(totalBeneficios);
-        return resp;
+    private Flux<PayrollEvent> eventsForCompany(UUID companyId, UUID employeeId, EventDateRange range) {
+        return eventRepository.findByEmployeeAndPeriod(employeeId, range.start(), range.end())
+                .filter(event -> companyId.equals(event.getCompanyId()));
     }
 }

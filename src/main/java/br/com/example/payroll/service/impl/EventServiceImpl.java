@@ -46,7 +46,7 @@ public class EventServiceImpl implements EventService {
         return eventsForCompany(companyId, employeeId, range)
                 .map(EventMapper::toDto);
     }
-
+    // todo melhorar o retorno
     @Override
     public Mono<ConsolidatedResponse> consolidate(UUID companyId, UUID employeeId, YearMonth period) {
         EventDateRange range = EventDateRange.fromYearMonth(period);

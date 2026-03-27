@@ -10,7 +10,7 @@
   <packaging>jar</packaging>
 
   <properties>
-    <java.version>21</java.version>
+    <java.version>17</java.version>
     <spring.boot.version>3.2.0</spring.boot.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <jacoco.minimum.coverage>0.80</jacoco.minimum.coverage>
@@ -36,20 +36,10 @@
       <artifactId>spring-boot-starter-webflux</artifactId>
     </dependency>
 
-    <!-- R2DBC H2 -->
+    <!-- Redis Reactive -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-data-r2dbc</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.r2dbc</groupId>
-      <artifactId>r2dbc-h2</artifactId>
-    </dependency>
-    <!-- H2 runtime (for compatibility/test) -->
-    <dependency>
-      <groupId>com.h2database</groupId>
-      <artifactId>h2</artifactId>
-      <scope>runtime</scope>
+      <artifactId>spring-boot-starter-data-redis-reactive</artifactId>
     </dependency>
 
     <!-- Validation -->
@@ -175,7 +165,7 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <version>3.2.5</version>
         <configuration>
-          <argLine>-Dnet.bytebuddy.experimental=true</argLine>
+          <argLine>@{argLine} -Dnet.bytebuddy.experimental=true</argLine>
         </configuration>
       </plugin>
 

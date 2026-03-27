@@ -1,8 +1,6 @@
 package br.com.example.payroll.domain;
 
 import lombok.*;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -11,9 +9,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table("payroll_event_type_config")
 public class PayrollEventTypeConfig {
-    @Id
     private UUID id;
     private String code;
     private String description;

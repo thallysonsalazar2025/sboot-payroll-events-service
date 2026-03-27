@@ -4,7 +4,7 @@ import br.com.example.payroll.domain.PayrollEvent;
 import br.com.example.payroll.dto.ConsolidatedResponse;
 import br.com.example.payroll.dto.PayrollEventRequest;
 import br.com.example.payroll.dto.PayrollEventResponse;
-import br.com.example.payroll.repository.PayrollEventRepository;
+import br.com.example.payroll.repository.PayrollEventRedisRepository;
 import br.com.example.payroll.service.impl.EventServiceImpl;
 import br.com.example.payroll.service.support.PayrollEventConsolidator;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,7 +30,7 @@ import static org.mockito.Mockito.when;
 class EventServiceImplTest {
 
     @Mock
-    PayrollEventRepository eventRepository;
+    PayrollEventRedisRepository eventRepository;
 
     @Mock
     PayrollEventConsolidator consolidator;

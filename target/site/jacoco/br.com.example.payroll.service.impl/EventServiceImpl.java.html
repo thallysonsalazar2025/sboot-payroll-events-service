@@ -1,11 +1,11 @@
-<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EventServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">sboot-payroll-events-service</a> &gt; <a href="index.source.html" class="el_package">br.com.example.payroll.service.impl</a> &gt; <span class="el_source">EventServiceImpl.java</span></div><h1>EventServiceImpl.java</h1><pre class="source lang-java linenums">package br.com.example.payroll.service.impl;
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EventServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">sboot-payroll-events-service</a> &gt; <a href="index.source.html" class="el_package">br.com.example.payroll.service.impl</a> &gt; <span class="el_source">EventServiceImpl.java</span></div><h1>EventServiceImpl.java</h1><pre class="source lang-java linenums">package br.com.example.payroll.service.impl;
 
 import br.com.example.payroll.domain.PayrollEvent;
 import br.com.example.payroll.dto.ConsolidatedResponse;
 import br.com.example.payroll.dto.PayrollEventRequest;
 import br.com.example.payroll.dto.PayrollEventResponse;
 import br.com.example.payroll.mapper.EventMapper;
-import br.com.example.payroll.repository.PayrollEventRepository;
+import br.com.example.payroll.repository.PayrollEventRedisRepository;
 import br.com.example.payroll.service.EventService;
 import br.com.example.payroll.service.support.EventDateRange;
 import br.com.example.payroll.service.support.PayrollEventConsolidator;
@@ -23,10 +23,10 @@ public class EventServiceImpl implements EventService {
 
 <span class="fc" id="L24">    private static final Logger log = LoggerFactory.getLogger(EventServiceImpl.class);</span>
 
-    private final PayrollEventRepository eventRepository;
+    private final PayrollEventRedisRepository eventRepository;
     private final PayrollEventConsolidator consolidator;
 
-    public EventServiceImpl(PayrollEventRepository eventRepository,
+    public EventServiceImpl(PayrollEventRedisRepository eventRepository,
 <span class="fc" id="L30">                            PayrollEventConsolidator consolidator) {</span>
 <span class="fc" id="L31">        this.eventRepository = eventRepository;</span>
 <span class="fc" id="L32">        this.consolidator = consolidator;</span>
@@ -41,7 +41,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public reactor.core.publisher.Flux&lt;PayrollEventResponse&gt; listEvents(UUID companyId, UUID employeeId, String startDate, String endDate) {
+    public Flux&lt;PayrollEventResponse&gt; listEvents(UUID companyId, UUID employeeId, String startDate, String endDate) {
 <span class="fc" id="L45">        EventDateRange range = EventDateRange.fromStrings(startDate, endDate);</span>
 <span class="fc" id="L46">        return eventsForCompany(companyId, employeeId, range)</span>
 <span class="fc" id="L47">                .map(EventMapper::toDto);</span>
@@ -57,7 +57,7 @@ public class EventServiceImpl implements EventService {
 
     private Flux&lt;PayrollEvent&gt; eventsForCompany(UUID companyId, UUID employeeId, EventDateRange range) {
 <span class="fc" id="L59">        return eventRepository.findByEmployeeAndPeriod(employeeId, range.start(), range.end())</span>
-<span class="pc" id="L60">                .filter(event -&gt; companyId.equals(event.getCompanyId()));</span>
+<span class="fc" id="L60">                .filter(event -&gt; companyId.equals(event.getCompanyId()));</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -10,7 +10,7 @@ import java.util.UUID;
 public class EventMapper {
 
     public static PayrollEvent toEntity(PayrollEventRequest req, UUID companyId) {
-        PayrollEvent entity = PayrollEvent.builder()
+        return PayrollEvent.builder()
                 .id(UUID.randomUUID())
                 .companyId(companyId)
                 .employeeId(req.getEmployeeId())
@@ -23,8 +23,6 @@ public class EventMapper {
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();
-        entity.setNewEntity(true);
-        return entity;
     }
 
     public static PayrollEventResponse toDto(PayrollEvent e) {

@@ -5,7 +5,7 @@ import br.com.example.payroll.dto.ConsolidatedResponse;
 import br.com.example.payroll.dto.PayrollEventRequest;
 import br.com.example.payroll.dto.PayrollEventResponse;
 import br.com.example.payroll.mapper.EventMapper;
-import br.com.example.payroll.repository.PayrollEventRepository;
+import br.com.example.payroll.repository.PayrollEventRedisRepository;
 import br.com.example.payroll.service.EventService;
 import br.com.example.payroll.service.support.EventDateRange;
 import br.com.example.payroll.service.support.PayrollEventConsolidator;
@@ -23,10 +23,10 @@ public class EventServiceImpl implements EventService {
 
     private static final Logger log = LoggerFactory.getLogger(EventServiceImpl.class);
 
-    private final PayrollEventRepository eventRepository;
+    private final PayrollEventRedisRepository eventRepository;
     private final PayrollEventConsolidator consolidator;
 
-    public EventServiceImpl(PayrollEventRepository eventRepository,
+    public EventServiceImpl(PayrollEventRedisRepository eventRepository,
                             PayrollEventConsolidator consolidator) {
         this.eventRepository = eventRepository;
         this.consolidator = consolidator;
@@ -41,12 +41,12 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public reactor.core.publisher.Flux<PayrollEventResponse> listEvents(UUID companyId, UUID employeeId, String startDate, String endDate) {
+    public Flux<PayrollEventResponse> listEvents(UUID companyId, UUID employeeId, String startDate, String endDate) {
         EventDateRange range = EventDateRange.fromStrings(startDate, endDate);
         return eventsForCompany(companyId, employeeId, range)
                 .map(EventMapper::toDto);
     }
-    // todo melhorar o retorno
+
     @Override
     public Mono<ConsolidatedResponse> consolidate(UUID companyId, UUID employeeId, YearMonth period) {
         EventDateRange range = EventDateRange.fromYearMonth(period);

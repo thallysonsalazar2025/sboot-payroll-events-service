@@ -32,9 +32,11 @@ class EventControllerIntegrationTest {
     private static final String BASE_PATH = "/api/v1/events";
     private static final String CONSOLIDATED_PATH = BASE_PATH + "/consolidated";
 
+    private static final String REDIS_IMAGE = "redis:7-alpine";
+
     @Container
     static GenericContainer<?> redis =
-            new GenericContainer<>(DockerImageName.parse("redis:7-alpine"))
+            new GenericContainer<>(DockerImageName.parse(REDIS_IMAGE))
                     .withExposedPorts(6379);
 
     @DynamicPropertySource

@@ -47,7 +47,10 @@ public class PayrollEventRedisRepository {
     public Flux<PayrollEvent> findByEmployeeAndPeriod(UUID employeeId, LocalDate startDate, LocalDate endDate) {
         String pattern = KEY_PREFIX + employeeId + ":*";
         return redisTemplate.scan(ScanOptions.scanOptions().match(pattern).count(100).build())
-                .flatMap(key -> redisTemplate.opsForValue().get(key))
+                .collectList()
+                .flatMapMany(keys -> keys.isEmpty()
+                        ? Flux.empty()
+                        : redisTemplate.opsForValue().multiGet(keys).flatMapMany(Flux::fromIterable))
                 .filter(event -> event != null
                         && !event.getEventDate().isBefore(startDate)
                         && !event.getEventDate().isAfter(endDate));
